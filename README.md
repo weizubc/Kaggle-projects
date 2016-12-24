@@ -1,2 +1,2 @@
-# Kaggle-for-fun
+# Kaggle-projects
 All my submissions for Kaggle contests.
