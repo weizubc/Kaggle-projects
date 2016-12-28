@@ -49,7 +49,7 @@ X_test = pd.read_csv("test.csv").values
 X_train = np.asarray(X_train / 255.0, 'float32')
 X_test = np.asarray(X_test / 255.0, 'float32')
 X_train, y_train = nudge_dataset(X_train, y_train)
-X_train= rotate_dataset(X_train)
+X_train = rotate_dataset(X_train)
 
 clf = DBN(
                                                              [X_train.shape[1], 1000, 10],
@@ -71,13 +71,13 @@ save= clf.predict(X_test)
 # TRAIN DATA
 train = pd.read_csv('train.csv')
 test = pd.read_csv('test.csv')
-combine=pd.concat([train,test],keys=['train','test'])
+combine = pd.concat([train,test],keys=['train','test'])
 
-X=combine.iloc[:,1:]
+X = combine.iloc[:,1:]
 
 #scale X with no elimination
-avg=X.mean()
-std=X.std()
+avg = X.mean()
+std = X.std()
 #pd.value_counts(std)
 
 def redefine(a):
@@ -85,44 +85,44 @@ def redefine(a):
         return 1
     return a
 
-std=std.apply(redefine)
-X_scale=(X-avg)/std
+std = std.apply(redefine)
+X_scale = (X-avg)/std
 
 
 
 #eliminate zero-variance columns
-std=X.std()
-zero=(std==0)
-X=X.drop(X.columns[zero],axis=1)
+std = X.std()
+zero = (std==0)
+X = X.drop(X.columns[zero],axis=1)
 
 
 #scale X with elimination
-avg=X.mean()
-std=X.std()
-X_scale0=(X-avg)/std
+avg = X.mean()
+std = X.std()
+X_scale0 = (X-avg)/std
 
 
 #do pca dimension reduction to 200
 pca = PCA(n_components=200)
-X_transform=pca.fit_transform(X_scale)
+X_transform = pca.fit_transform(X_scale)
 
 
 
 #separate train data from combine
-y=combine['label'].ix['train']
-train_transform=X_transform[0:len(y)]
+y = combine['label'].ix['train']
+train_transform = X_transform[0:len(y)]
 
 
 
 
 #find the element with highest counts
 def mode(a):
-    count=0
-    element=a[0]
+    count = 0
+    element = a[0]
     for i in a:
         if a.count(i)>count:
-            count=a.count(i)
-            element=i
+            count = a.count(i)
+            element = i
     return element
 
 
@@ -130,9 +130,9 @@ def mode(a):
 #reorgnize list
 #a=list([array2,array2,array3])
 def reorg(a):
-    element=[]
+    element = []
     for i in range(len(a[0])):
-        b=[]
+        b = []
         for j in range(len(a)):
             b.append(a[j][i])
         element.append(mode(b))
@@ -142,8 +142,8 @@ def reorg(a):
 
 
 #submission
-test_transform=X_transform[len(y):]
-id=np.array(list(range(len(test_transform))))+1
+test_transform = X_transform[len(y):]
+id = np.array(list(range(len(test_transform))))+1
 
 
 

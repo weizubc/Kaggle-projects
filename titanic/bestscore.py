@@ -13,13 +13,13 @@ from sklearn.ensemble import RandomForestClassifier
 
 titanic = pandas.read_csv("train.csv")
 titanic_test = pandas.read_csv("test.csv")
-combine=pandas.concat([titanic,titanic_test],keys=['train','test'])
+combine = pandas.concat([titanic,titanic_test],keys=['train','test'])
 
 combine.loc[combine["Sex"] == "male", "Sex"] = 0
 combine.loc[combine["Sex"] == "female", "Sex"] = 1
 
 #print(combine["Embarked"].unique())
-combine['Embarked']=combine['Embarked'].fillna('S')
+combine['Embarked'] = combine['Embarked'].fillna('S')
 combine.loc[combine['Embarked'] == 'S', 'Embarked'] = 0
 combine.loc[combine['Embarked'] == 'C', 'Embarked'] = 1
 combine.loc[combine['Embarked'] == 'Q', 'Embarked'] = 2
@@ -62,8 +62,8 @@ combine["Title"] = titles
 
 
 #genearting a married dummy
-combine["Married"]=0
-combine.loc[(combine['Title']==1) | (combine['Title']==3), 'Married'] =1
+combine["Married"] = 0
+combine.loc[(combine['Title']==1) | (combine['Title']==3), 'Married'] = 1
 
 
 
@@ -71,23 +71,23 @@ combine.loc[(combine['Title']==1) | (combine['Title']==3), 'Married'] =1
 predictors = ["Pclass", "Sex", "SibSp", "Parch", "Fare", "Embarked"]
 alg = LinearRegression()
 
-y=combine['Age'].dropna()
-missing=pandas.isnull(combine['Age'])
-x=combine[predictors][-missing]
-y=combine["Age"][-missing]
+y = combine['Age'].dropna()
+missing = pandas.isnull(combine['Age'])
+x = combine[predictors][-missing]
+y = combine["Age"][-missing]
 alg.fit(x,y)
-predictions=alg.predict(combine[predictors][missing])
+predictions = alg.predict(combine[predictors][missing])
 
 #combine.loc[missing, 'Age'] = predictions
 #combine['Age'] = combine['Age'].fillna(combine['Age'].median())
 
 #use the median age of the title group as best guess
-a=combine.groupby(["Title"]).Age.median()
+a = combine.groupby(["Title"]).Age.median()
 
 # A function to get the number of women in a family given a row
 def get_age(row):
     if pandas.isnull(row['Age']):
-        row['Age']=a[row['Title']]
+        row['Age'] = a[row['Title']]
     return row
 
 # Get the number of women with the apply method
@@ -121,7 +121,7 @@ id = combine.apply(get_family_id, axis=1)
 combine["id"] = id
 
 #save to identify the family
-family_ids=id*1
+family_ids = id*1
 
 # There are a lot of family ids, so we'll compress all of the families under 3 members into one code.
 family_ids[combine["FamilySize"] < 3] = -1
@@ -135,34 +135,34 @@ combine["FamilyId"] = family_ids
 
 
 #Generating the number of women in a family
-combine["Sex"]=combine["Sex"].astype(float)
-a=combine.groupby(["id"]).Sex.sum()
+combine["Sex"] = combine["Sex"].astype(float)
+a = combine.groupby(["id"]).Sex.sum()
 
 # A function to get the number of women in a family given a row
 def get_sum(row):
-    id_ask=row["id"]
+    id_ask = row["id"]
     return a.loc[id_ask]
 
 # Get the number of women with the apply method
 women = combine.apply(get_sum, axis=1)
-combine["FamilyWomen"]=women
+combine["FamilyWomen"] = women
 
 
 
 
 #Generating the number of children in a family
-combine["child"]=0
+combine["child"] = 0
 combine.loc[combine['Age'] < 18, 'child'] = 1
-a=combine.groupby(["id"]).child.sum()
+a = combine.groupby(["id"]).child.sum()
 
 # A function to get the number of children in a family given a row
 def get_sum(row):
-    id_ask=row["id"]
+    id_ask = row["id"]
     return a.loc[id_ask]
 
 # Get the number of children with the apply method
-children= combine.apply(get_sum, axis=1)
-combine["FamilyChildren"]=children
+children = combine.apply(get_sum, axis=1)
+combine["FamilyChildren"] = children
 
 
 
@@ -174,7 +174,7 @@ combine["FamilyChildren"]=children
 #print(pandas.value_counts(combine["Cabin"]))
 #combine.loc[pandas.isnull(combine['Cabin']), 'Cabin'] = 0
 
-combine['Cabin']=combine['Cabin'].fillna('UNK')
+combine['Cabin'] = combine['Cabin'].fillna('UNK')
 
 #print(pandas.value_counts(combine["Cabin"]))
 
@@ -187,7 +187,7 @@ def get_letter(name):
     return ""
 
 # Get all the letters and print how often each one occurs.
-combine["Cabin"]=combine["Cabin"].astype(object)
+combine["Cabin"] = combine["Cabin"].astype(object)
 letter = combine["Cabin"].apply(get_letter)
 #print(pandas.value_counts(letter))
 
@@ -203,36 +203,36 @@ combine["CabinLetter"] = letter
 
 #Generating survivor feature variable
 #if other family members survived
-#filling the survived value=0 for test data temporarily
+#filling the survived value = 0 for test data temporarily
 combine['Survived'] = combine['Survived'].fillna(0)
-a=combine.groupby(["id"]).Survived.sum()
+a = combine.groupby(["id"]).Survived.sum()
 
 def get_sum(row):
-    id_ask=row["id"]
+    id_ask = row["id"]
     return a.loc[id_ask]
 
 # Get the number of survivors with the apply method
 survivor = combine.apply(get_sum, axis=1)
-combine['FamilySurvive']=survivor-combine['Survived']
+combine['FamilySurvive'] = survivor-combine['Survived']
 
 
 
 
 #if other cabin members survived
-a=combine.groupby(["Cabin"]).Survived.sum()
+a = combine.groupby(["Cabin"]).Survived.sum()
 
 def get_sum(row):
     return a.loc[row["Cabin"]]
 
 # Get the number of survivors with the apply method
 survivor = combine.apply(get_sum, axis=1)
-combine['CabinSurvive']=survivor-combine['Survived']
-combine.loc[combine['Cabin']=='UNK', 'CabinSurvive'] =0
+combine['CabinSurvive'] = survivor-combine['Survived']
+combine.loc[combine['Cabin']=='UNK', 'CabinSurvive'] = 0
 
 
 
 #Genearating help dummy
-combine['helpdummy']=0
+combine['helpdummy'] = 0
 combine.loc[((combine['FamilySurvive']>0) | (combine['CabinSurvive']>0)) & (combine['Sex']==1), 'helpdummy'] = 1
 combine.loc[((combine['FamilySurvive']>0) | (combine['CabinSurvive']>0)) & (combine['Age']<18), 'helpdummy'] = 1
 
@@ -240,11 +240,11 @@ combine.loc[((combine['FamilySurvive']>0) | (combine['CabinSurvive']>0)) & (comb
 
 
 #train data
-titanic=combine.ix['train']
+titanic = combine.ix['train']
 
 tpredictors = ["Pclass", "Sex", "Age", "Fare", "Embarked", "FamilySize", "Title", "FamilyId","Married","helpdummy"]
-lpredictors=["Pclass", "Sex", "Fare", "Parch","SibSp", "Title", "Age", "Embarked","FamilyId","FamilyWomen","CabinLetter","NameLength","Married","helpdummy"]
-spredictors=["Pclass", "Sex", "Age", "FamilySize", "Fare", "Embarked", "Title","FamilyId","FamilyWomen"]
+lpredictors = ["Pclass", "Sex", "Fare", "Parch","SibSp", "Title", "Age", "Embarked","FamilyId","FamilyWomen","CabinLetter","NameLength","Married","helpdummy"]
+spredictors = ["Pclass", "Sex", "Age", "FamilySize", "Fare", "Embarked", "Title","FamilyId","FamilyWomen"]
 # Initialize our algorithm with the default paramters
 # n_estimators is the number of trees we want to make
 # min_samples_split is the minimum number of rows we need to make a split
@@ -282,9 +282,9 @@ for train, test in kf:
         # The .astype(float) is necessary to convert the dataframe to all floats and avoid an sklearn error.
         test_predictions = alg.predict_proba(titanic[predictors].iloc[test,:].astype(float))[:,1]
         full_test_predictions.append(test_predictions)
-    #predict suvivial=1 if both models have predict_prob>0.5
+    #predict suvivial = 1 if both models have predict_prob>0.5
     test_predictions = (full_test_predictions[0]>0.5) & (full_test_predictions[1]>0.5)
-    test_predictions=test_predictions.astype(float)
+    test_predictions = test_predictions.astype(float)
     predictions.append(test_predictions)
 
 
@@ -300,7 +300,7 @@ print(accuracy)
 
 
 #submission
-titanic_test=combine.ix['test']
+titanic_test = combine.ix['test']
 
 algorithms = [
               [RandomForestClassifier(random_state=1, n_estimators=150, min_samples_split=6, min_samples_leaf=3), tpredictors],
@@ -316,7 +316,7 @@ for alg, predictors in algorithms:
     full_predictions.append(predictions)
 
 predictions = (full_predictions[0]>0.5) & (full_predictions[1]>0.5)
-predictions=predictions.astype(int)
+predictions = predictions.astype(int)
 submission = pandas.DataFrame({
         "PassengerId": titanic_test["PassengerId"],
         "Survived": predictions
