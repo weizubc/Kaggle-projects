@@ -175,7 +175,7 @@ submission = pd.DataFrame({
 
 submission.to_csv("kaggle.csv", index=False)
 
-#0.98443 combining with other algorithms
+#0.9897 accuracy combining with other algorithms
 #Random forest around 0.962 accuracy
 #SVM around 0.973 accuracy with degree 3 work best(need to do pca to speed up)
 #Neural network without expanding data around 0.966 accuracy
